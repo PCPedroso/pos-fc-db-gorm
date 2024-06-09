@@ -15,6 +15,7 @@ type Produto struct {
 	Preco        float64
 	CategoriaID  int
 	Categoria    Categoria
+	Filiais      []Filial `gorm:"many2many:produtos_filiais;"`
 	NumeroSerial NumeroSerial
 	gorm.Model
 }
@@ -23,6 +24,12 @@ type Produto struct {
 type Categoria struct {
 	Nome     string
 	Produtos []Produto
+	gorm.Model
+}
+
+type Filial struct {
+	Nome     string
+	Produtos []Produto `gorm:"many2many:produtos_filiais;"`
 	gorm.Model
 }
 
@@ -40,118 +47,128 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&Produto{}, &Categoria{}, &NumeroSerial{})
+	db.AutoMigrate(&Produto{}, &Categoria{}, &NumeroSerial{}, &Filial{})
 
-	// portatil := Categoria{Nome: "Portátil"}
-	// db.Save(&portatil)
+	fmt.Println("Criando Filiais")
+	matriz := Filial{Nome: "Matriz"}
+	db.Create(&matriz)
 
-	// perifericos := Categoria{Nome: "Periféricos"}
-	// db.Save(&perifericos)
+	filial := Filial{Nome: "Filial"}
+	db.Create(&filial)
 
-	// // Passando um slice de produtos
-	// produtos := []Produto{
-	// 	{Nome: "Mouse", Preco: 160.00, Categoria: perifericos},
-	// 	{Nome: "Monitor", Preco: 890.00, Categoria: perifericos},
-	// 	{Nome: "Placa mãe", Preco: 1280.00, Categoria: perifericos},
-	// }
+	fmt.Println("Criando Categorias")
+	portatil := Categoria{Nome: "Portátil"}
+	db.Create(&portatil)
 
-	// db.Create(&produtos)
+	perifericos := Categoria{Nome: "Periféricos"}
+	db.Create(&perifericos)
 
-	// //Criando um produto
-	// db.Create(&Produto{
-	// 	Nome:      "Notebook",
-	// 	Preco:     2560.30,
-	// 	Categoria: portatil,
-	// })
+	// Passando um slice de produtos
+	fmt.Println("Criando Produtos")
+	produtos := []Produto{
+		{Nome: "Mouse", Preco: 160.00, Categoria: perifericos, Filiais: []Filial{matriz, filial}},
+		{Nome: "Monitor", Preco: 890.00, Categoria: perifericos, Filiais: []Filial{matriz}},
+		{Nome: "Placa mãe", Preco: 1280.00, Categoria: perifericos, Filiais: []Filial{filial}},
+	}
 
-	// // Ao criar ele já retorna os valores do banco atualizados, inclusive com o ID gerado
-	// for _, p := range produtos {
-	// 	fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
-	// }
+	db.Create(&produtos)
 
-	// var prod1 Produto
-	// db.First(&prod1, 2)
-	// fmt.Println(&prod1)
+	//Criando um produto
+	db.Create(&Produto{
+		Nome:      "Notebook",
+		Preco:     2560.30,
+		Categoria: portatil,
+		Filiais:   []Filial{matriz, filial},
+	})
 
-	// var prod2 Produto
-	// db.First(&prod2, "nome = ?", "Monitor")
-	// fmt.Println(&prod2)
+	// Ao criar ele já retorna os valores do banco atualizados, inclusive com o ID gerado
+	for _, p := range produtos {
+		fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
+	}
 
-	// var lista []Produto
-	// db.Find(&lista)
+	var prod1 Produto
+	db.First(&prod1, 2)
+	fmt.Println(&prod1)
 
-	// for _, p := range lista {
-	// 	fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
-	// }
+	var prod2 Produto
+	db.First(&prod2, "nome = ?", "Monitor")
+	fmt.Println(&prod2)
 
-	// produtos = []Produto{}
-	// // Limitanto a quantidade de retorno
-	// db.Limit(2).Find(&produtos)
-	// for _, p := range produtos {
-	// 	fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
-	// }
-	// fmt.Println("======")
-	// // Paginando
-	// db.Limit(2).Offset(2).Find(&produtos)
-	// for _, p := range produtos {
-	// 	fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
-	// }
+	var lista []Produto
+	db.Find(&lista)
 
-	// fmt.Println("======")
-	// // Aplicando uma condição para a busca
-	// db.Where("preco > ?", 500).Find(&produtos)
-	// for _, p := range produtos {
-	// 	fmt.Printf("ID: %v , Nome: %v, Preco: %.2f\n", p.ID, p.Nome, p.Preco)
-	// }
+	for _, p := range lista {
+		fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
+	}
 
-	// fmt.Println("======")
-	// // Aplicando uma condição para a busca
-	// db.Where("nome LIKE ?", "%Mo%").Find(&produtos)
-	// for _, p := range produtos {
-	// 	fmt.Printf("ID: %v , Nome: %v, Preco: %.2f\n", p.ID, p.Nome, p.Preco)
-	// }
+	produtos = []Produto{}
+	// Limitanto a quantidade de retorno
+	db.Limit(2).Find(&produtos)
+	for _, p := range produtos {
+		fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
+	}
+	fmt.Println("======")
+	// Paginando
+	db.Limit(2).Offset(2).Find(&produtos)
+	for _, p := range produtos {
+		fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
+	}
 
-	// prod1 = Produto{}
-	// db.First(&prod1, "nome = ?", "Mouse")
-	// prod1.Nome = "Mouse Razer"
-	// db.Save(&prod1)
+	fmt.Println("======")
+	// Aplicando uma condição para a busca
+	db.Where("preco > ?", 500).Find(&produtos)
+	for _, p := range produtos {
+		fmt.Printf("ID: %v , Nome: %v, Preco: %.2f\n", p.ID, p.Nome, p.Preco)
+	}
 
-	// fmt.Println("======")
-	// prod2 = Produto{}
-	// db.First(&prod2, "nome LIKE ?", "%Mouse%")
-	// fmt.Printf("Nome: %v, Preco: %.2f\n", prod2.Nome, prod2.Preco)
+	fmt.Println("======")
+	// Aplicando uma condição para a busca
+	db.Where("nome LIKE ?", "%Mo%").Find(&produtos)
+	for _, p := range produtos {
+		fmt.Printf("ID: %v , Nome: %v, Preco: %.2f\n", p.ID, p.Nome, p.Preco)
+	}
 
-	// var periferico Categoria
-	// db.Find(&periferico, "nome = ?", "Periféricos")
+	prod1 = Produto{}
+	db.First(&prod1, "nome = ?", "Mouse")
+	prod1.Nome = "Mouse Razer"
+	db.Save(&prod1)
 
-	// produtos = []Produto{}
-	// fmt.Println("======")
-	// fmt.Println(periferico.Nome)
-	// db.Where("categoria_id = ?", periferico.ID).Find(&produtos)
-	// for _, p := range produtos {
-	// 	fmt.Printf("ID: %v , Nome: %v, Preco: %.2f\n", p.ID, p.Nome, p.Preco)
-	// }
+	fmt.Println("======")
+	prod2 = Produto{}
+	db.First(&prod2, "nome LIKE ?", "%Mouse%")
+	fmt.Printf("Nome: %v, Preco: %.2f\n", prod2.Nome, prod2.Preco)
 
-	// fmt.Println("======")
-	// fmt.Println("Todos os Produtos")
-	// produtos = []Produto{}
-	// db.Preload("Categoria").Find(&produtos)
-	// for _, p := range produtos {
-	// 	fmt.Printf("Produto: %v, Categoria: %v\n", p.Nome, p.Categoria.Nome)
-	// 	if p.NumeroSerial.ProdutoID == 0 {
-	// 		var numeroSerial = NumeroSerial{}
-	// 		numeroSerial.Numero = fmt.Sprintf("%d%d", p.ID, p.CategoriaID)
-	// 		numeroSerial.ProdutoID = int(p.ID)
-	// 		db.Save(&numeroSerial)
-	// 	}
-	// }
+	var periferico Categoria
+	db.Find(&periferico, "nome = ?", "Periféricos")
 
-	// fmt.Println("======")
-	// fmt.Println("Todos os Produtos com Numero Serial")
-	// db.Preload("NumeroSerial").Find(&produtos)
-	// for _, p := range produtos {
-	// 	fmt.Printf("ID: %v , Nome: %v, Serial: %v\n", p.ID, p.Nome, p.NumeroSerial.Numero)
-	// }
+	produtos = []Produto{}
+	fmt.Println("======")
+	fmt.Println(periferico.Nome)
+	db.Where("categoria_id = ?", periferico.ID).Find(&produtos)
+	for _, p := range produtos {
+		fmt.Printf("ID: %v , Nome: %v, Preco: %.2f\n", p.ID, p.Nome, p.Preco)
+	}
+
+	fmt.Println("======")
+	fmt.Println("Todos os Produtos")
+	produtos = []Produto{}
+	db.Preload("Categoria").Find(&produtos)
+	for _, p := range produtos {
+		fmt.Printf("Produto: %v, Categoria: %v\n", p.Nome, p.Categoria.Nome)
+		if p.NumeroSerial.ProdutoID == 0 {
+			var numeroSerial = NumeroSerial{}
+			numeroSerial.Numero = fmt.Sprintf("%d%d", p.ID, p.CategoriaID)
+			numeroSerial.ProdutoID = int(p.ID)
+			db.Save(&numeroSerial)
+		}
+	}
+
+	fmt.Println("======")
+	fmt.Println("Todos os Produtos com Numero Serial")
+	db.Preload("NumeroSerial").Find(&produtos)
+	for _, p := range produtos {
+		fmt.Printf("ID: %v , Nome: %v, Serial: %v\n", p.ID, p.Nome, p.NumeroSerial.Numero)
+	}
 
 	// Buscando Produtos com Preload
 	var categorias []Categoria

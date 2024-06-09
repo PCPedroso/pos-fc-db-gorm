@@ -5,6 +5,7 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // Ao utilizar a instrução gorm.Model, os campos ID, CreatedAt, UpdatedAt e DeletedAt são gerados automáticamente
@@ -49,155 +50,185 @@ func main() {
 	}
 	db.AutoMigrate(&Produto{}, &Categoria{}, &NumeroSerial{}, &Filial{})
 
-	fmt.Println("Criando Filiais")
-	matriz := Filial{Nome: "Matriz"}
-	db.Create(&matriz)
+	// fmt.Println("Criando Filiais")
+	// matriz := Filial{Nome: "Matriz"}
+	// db.Create(&matriz)
 
-	filial := Filial{Nome: "Filial"}
-	db.Create(&filial)
+	// filial := Filial{Nome: "Filial"}
+	// db.Create(&filial)
 
-	fmt.Println("Criando Categorias")
-	portatil := Categoria{Nome: "Portátil"}
-	db.Create(&portatil)
+	// fmt.Println("Criando Categorias")
+	// portatil := Categoria{Nome: "Portátil"}
+	// db.Create(&portatil)
 
-	perifericos := Categoria{Nome: "Periféricos"}
-	db.Create(&perifericos)
+	// perifericos := Categoria{Nome: "Periféricos"}
+	// db.Create(&perifericos)
 
-	// Passando um slice de produtos
-	fmt.Println("Criando Produtos")
-	produtos := []Produto{
-		{Nome: "Mouse", Preco: 160.00, Categoria: perifericos, Filiais: []Filial{matriz, filial}},
-		{Nome: "Monitor", Preco: 890.00, Categoria: perifericos, Filiais: []Filial{matriz}},
-		{Nome: "Placa mãe", Preco: 1280.00, Categoria: perifericos, Filiais: []Filial{filial}},
-	}
+	// // Passando um slice de produtos
+	// fmt.Println("Criando Produtos")
+	// produtos := []Produto{
+	// 	{Nome: "Mouse", Preco: 160.00, Categoria: perifericos, Filiais: []Filial{matriz, filial}},
+	// 	{Nome: "Monitor", Preco: 890.00, Categoria: perifericos, Filiais: []Filial{matriz}},
+	// 	{Nome: "Placa mãe", Preco: 1280.00, Categoria: perifericos, Filiais: []Filial{filial}},
+	// }
 
-	db.Create(&produtos)
+	// db.Create(&produtos)
 
-	//Criando um produto
-	db.Create(&Produto{
-		Nome:      "Notebook",
-		Preco:     2560.30,
-		Categoria: portatil,
-		Filiais:   []Filial{matriz, filial},
-	})
+	// //Criando um produto
+	// db.Create(&Produto{
+	// 	Nome:      "Notebook",
+	// 	Preco:     2560.30,
+	// 	Categoria: portatil,
+	// 	Filiais:   []Filial{matriz, filial},
+	// })
 
-	// Ao criar ele já retorna os valores do banco atualizados, inclusive com o ID gerado
-	for _, p := range produtos {
-		fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
-	}
+	// // Ao criar ele já retorna os valores do banco atualizados, inclusive com o ID gerado
+	// for _, p := range produtos {
+	// 	fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
+	// }
 
-	var prod1 Produto
-	db.First(&prod1, 2)
-	fmt.Println(&prod1)
+	// var prod1 Produto
+	// db.First(&prod1, 2)
+	// fmt.Println(&prod1)
 
-	var prod2 Produto
-	db.First(&prod2, "nome = ?", "Monitor")
-	fmt.Println(&prod2)
+	// var prod2 Produto
+	// db.First(&prod2, "nome = ?", "Monitor")
+	// fmt.Println(&prod2)
 
-	var lista []Produto
-	db.Find(&lista)
+	// var lista []Produto
+	// db.Find(&lista)
 
-	for _, p := range lista {
-		fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
-	}
+	// for _, p := range lista {
+	// 	fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
+	// }
 
-	produtos = []Produto{}
-	// Limitanto a quantidade de retorno
-	db.Limit(2).Find(&produtos)
-	for _, p := range produtos {
-		fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
-	}
-	fmt.Println("======")
-	// Paginando
-	db.Limit(2).Offset(2).Find(&produtos)
-	for _, p := range produtos {
-		fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
-	}
+	// produtos = []Produto{}
+	// // Limitanto a quantidade de retorno
+	// db.Limit(2).Find(&produtos)
+	// for _, p := range produtos {
+	// 	fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
+	// }
+	// fmt.Println("======")
+	// // Paginando
+	// db.Limit(2).Offset(2).Find(&produtos)
+	// for _, p := range produtos {
+	// 	fmt.Printf("ID: %v , Nome: %v\n", p.ID, p.Nome)
+	// }
 
-	fmt.Println("======")
-	// Aplicando uma condição para a busca
-	db.Where("preco > ?", 500).Find(&produtos)
-	for _, p := range produtos {
-		fmt.Printf("ID: %v , Nome: %v, Preco: %.2f\n", p.ID, p.Nome, p.Preco)
-	}
+	// fmt.Println("======")
+	// // Aplicando uma condição para a busca
+	// db.Where("preco > ?", 500).Find(&produtos)
+	// for _, p := range produtos {
+	// 	fmt.Printf("ID: %v , Nome: %v, Preco: %.2f\n", p.ID, p.Nome, p.Preco)
+	// }
 
-	fmt.Println("======")
-	// Aplicando uma condição para a busca
-	db.Where("nome LIKE ?", "%Mo%").Find(&produtos)
-	for _, p := range produtos {
-		fmt.Printf("ID: %v , Nome: %v, Preco: %.2f\n", p.ID, p.Nome, p.Preco)
-	}
+	// fmt.Println("======")
+	// // Aplicando uma condição para a busca
+	// db.Where("nome LIKE ?", "%Mo%").Find(&produtos)
+	// for _, p := range produtos {
+	// 	fmt.Printf("ID: %v , Nome: %v, Preco: %.2f\n", p.ID, p.Nome, p.Preco)
+	// }
 
-	prod1 = Produto{}
-	db.First(&prod1, "nome = ?", "Mouse")
-	prod1.Nome = "Mouse Razer"
-	db.Save(&prod1)
+	// prod1 = Produto{}
+	// db.First(&prod1, "nome = ?", "Mouse")
+	// prod1.Nome = "Mouse Razer"
+	// db.Save(&prod1)
 
-	fmt.Println("======")
-	prod2 = Produto{}
-	db.First(&prod2, "nome LIKE ?", "%Mouse%")
-	fmt.Printf("Nome: %v, Preco: %.2f\n", prod2.Nome, prod2.Preco)
+	// fmt.Println("======")
+	// prod2 = Produto{}
+	// db.First(&prod2, "nome LIKE ?", "%Mouse%")
+	// fmt.Printf("Nome: %v, Preco: %.2f\n", prod2.Nome, prod2.Preco)
 
-	var periferico Categoria
-	db.Find(&periferico, "nome = ?", "Periféricos")
+	// var periferico Categoria
+	// db.Find(&periferico, "nome = ?", "Periféricos")
 
-	produtos = []Produto{}
-	fmt.Println("======")
-	fmt.Println(periferico.Nome)
-	db.Where("categoria_id = ?", periferico.ID).Find(&produtos)
-	for _, p := range produtos {
-		fmt.Printf("ID: %v , Nome: %v, Preco: %.2f\n", p.ID, p.Nome, p.Preco)
-	}
+	// produtos = []Produto{}
+	// fmt.Println("======")
+	// fmt.Println(periferico.Nome)
+	// db.Where("categoria_id = ?", periferico.ID).Find(&produtos)
+	// for _, p := range produtos {
+	// 	fmt.Printf("ID: %v , Nome: %v, Preco: %.2f\n", p.ID, p.Nome, p.Preco)
+	// }
 
-	fmt.Println("======")
-	fmt.Println("Todos os Produtos")
-	produtos = []Produto{}
-	db.Preload("Categoria").Find(&produtos)
-	for _, p := range produtos {
-		fmt.Printf("Produto: %v, Categoria: %v\n", p.Nome, p.Categoria.Nome)
-		if p.NumeroSerial.ProdutoID == 0 {
-			var numeroSerial = NumeroSerial{}
-			numeroSerial.Numero = fmt.Sprintf("%d%d", p.ID, p.CategoriaID)
-			numeroSerial.ProdutoID = int(p.ID)
-			db.Save(&numeroSerial)
-		}
-	}
+	// fmt.Println("======")
+	// fmt.Println("Todos os Produtos")
+	// produtos = []Produto{}
+	// db.Preload("Categoria").Find(&produtos)
+	// for _, p := range produtos {
+	// 	fmt.Printf("Produto: %v, Categoria: %v\n", p.Nome, p.Categoria.Nome)
+	// 	if p.NumeroSerial.ProdutoID == 0 {
+	// 		var numeroSerial = NumeroSerial{}
+	// 		numeroSerial.Numero = fmt.Sprintf("%d%d", p.ID, p.CategoriaID)
+	// 		numeroSerial.ProdutoID = int(p.ID)
+	// 		db.Save(&numeroSerial)
+	// 	}
+	// }
 
-	fmt.Println("======")
-	fmt.Println("Todos os Produtos com Numero Serial")
-	db.Preload("NumeroSerial").Find(&produtos)
-	for _, p := range produtos {
-		fmt.Printf("ID: %v , Nome: %v, Serial: %v\n", p.ID, p.Nome, p.NumeroSerial.Numero)
-	}
+	// fmt.Println("======")
+	// fmt.Println("Todos os Produtos com Numero Serial")
+	// db.Preload("NumeroSerial").Find(&produtos)
+	// for _, p := range produtos {
+	// 	fmt.Printf("ID: %v , Nome: %v, Serial: %v\n", p.ID, p.Nome, p.NumeroSerial.Numero)
+	// }
 
-	// Buscando Produtos com Preload
-	var categorias []Categoria
-	err = db.Model(&Categoria{}).Preload("Produtos").Find(&categorias).Error
+	// // Buscando Produtos com Preload
+	// var categorias []Categoria
+	// err = db.Model(&Categoria{}).Preload("Produtos").Find(&categorias).Error
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// for _, c := range categorias {
+	// 	fmt.Println(c.Nome)
+	// 	for _, p := range c.Produtos {
+	// 		fmt.Printf("-> Produto: %v, Preco: %.2f\n", p.Nome, p.Preco)
+	// 	}
+	// 	fmt.Println("")
+	// }
+
+	// fmt.Println("======")
+	// // Buscando Produtos e NumeroSerial com Preload
+	// categorias = []Categoria{}
+	// err = db.Model(&Categoria{}).Preload("Produtos.NumeroSerial").Find(&categorias).Error
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// for _, c := range categorias {
+	// 	fmt.Println(c.Nome)
+	// 	for _, p := range c.Produtos {
+	// 		fmt.Printf("-> Produto: %v, Preco: %.2f, Serial: %v\n", p.Nome, p.Preco, p.NumeroSerial.Numero)
+	// 	}
+	// 	fmt.Println("")
+	// }
+
+	// =========================================================================================================================//
+	// Lock Otimista vs Lock Pessimista																							//
+	// -- Otimista cria um versionamento na tabela, para casos onde não se tem muita concorrência com os dados					//
+	// Ex:																														//
+	// Nome			Email				Versao																					//
+	// Pedroso		pedroso@gmail.com	1																						//
+	// Antes de salvar deve-se fazer uma busca no banco e caso a versão ainda for 1, efetiva a alteração, caso contrário, com	//
+	// estes novos dados, começa todo processamento novamente, repetindo tudo até a nova comparação e se tudo der certo, salva	//
+	//																															//
+	// -- Pessimista faz um bloqueio na tabela e só permite alteração apóes liberação do programa ao terminar todo processo		//
+	// =========================================================================================================================//
+
+	// Exemplo de Lock Pessimista
+
+	// Iniciando uma transação manual (o Gorm sempre trabalha com transaction por padrão)
+	tx := db.Begin()
+	var categoria = Categoria{}
+	// Bloqueia o registro com Strength de UPDATE, e estou utilizando o .Debug para imprimir o que está acontecendo
+	err = tx.Debug().Clauses(clause.Locking{Strength: "UPDATE"}).First(&categoria, 1).Error
 	if err != nil {
 		panic(err)
 	}
 
-	for _, c := range categorias {
-		fmt.Println(c.Nome)
-		for _, p := range c.Produtos {
-			fmt.Printf("-> Produto: %v, Preco: %.2f\n", p.Nome, p.Preco)
-		}
-		fmt.Println("")
-	}
+	// Modifico o nome, salvo e ao final commito a transação, liberando assim o registro
+	categoria.Nome = "Portatais"
+	tx.Debug().Save(&categoria)
+	tx.Commit()
 
-	fmt.Println("======")
-	// Buscando Produtos e NumeroSerial com Preload
-	categorias = []Categoria{}
-	err = db.Model(&Categoria{}).Preload("Produtos.NumeroSerial").Find(&categorias).Error
-	if err != nil {
-		panic(err)
-	}
-
-	for _, c := range categorias {
-		fmt.Println(c.Nome)
-		for _, p := range c.Produtos {
-			fmt.Printf("-> Produto: %v, Preco: %.2f, Serial: %v\n", p.Nome, p.Preco, p.NumeroSerial.Numero)
-		}
-		fmt.Println("")
-	}
+	fmt.Printf("Categoria: %v", categoria.Nome)
 }
